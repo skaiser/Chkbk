@@ -1,0 +1,2 @@
+diff -Naur chkbk chkbk.1.55.final > chkbk.patch
+patch -p0 < chkbk.patch

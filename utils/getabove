@@ -1,0 +1,1 @@
+sed -n '1!G;h;' sav.db | sed -n /^4/,$p | sed '1d' | sed -n '1!G;h;'

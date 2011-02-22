@@ -1,0 +1,125 @@
+4/05	- created basic menus of program-main, checking, and savings
+
+9/16/05	- added backup option to main menu and corresponding submenus
+	  for backing up checking or savings accounts.
+	  Backup features the ability to make a backup to current directory
+	  or somewhere else in the file system.
+	  Verifies whether the backup was successfully created and prompts
+	  for confirmation before overwriting existing db. 
+
+9/17/05	- added restore option to main menu and corresponding submenus
+	  for restoring previously backed up checking or savings databases.
+	  Restore features the ability to restore from the default backup
+	  directory or from somewhere else in the file system.
+
+9/19/05 - updated UI...added Welcome to ChkBk animation on main menu.
+
+
+10/02/05 - added print feature
+		updated checking menu so that it actually works now!
+
+10/03/05 - ChkBk's first stable version, Version 1.0, released!
+		- added license...ChkBk is now licensed under the terms of
+		the GPL.  
+		- Added Helpfile.
+		- Minor interface touch-ups.
+
+10/07/05 - Version 1.1, massive code cleanup...the whole program runs out of only
+		one script now instead of four separate scripts.
+		- added support for any character or digit as code input
+		- fixed some menu navigation quirks
+		- changed to default location of databases, HELP, etc.
+			to $HOME/.chkbk	directory in preparation for install script
+
+10/08/05 - Version 1.1.1, make menu navigation more logical and user friendly
+		- added usage help message if chkbk is called with arguments
+
+10/21/05 - Version 1.2 added isntall script which allows the user to install
+	   as root for all (cough) users, except root.  Only installs to users
+	   with a home directory under /home for right now.
+
+10/29/05 - Version 1.21 - fixed some problems with install script when installing
+	   on OpenBSD caused by differences in O-BSD's test options.
+
+10/30/05 - Version 1.22 - fixed some output inconsistencies on Windows in install.sh.
+	   	- Fixed a problem where if chkbk directory already exists during "bin",
+		  installer just removes and doesn't install new version.
+
+03/15/06 - Version 1.23 - Fixed bug in the checkchk() function call to make it properly identify when a check number has
+		already been used and only identify by the check number.
+		- Previously, the command did not work at all in /bin/sh due to use of brackets [] with the test command,
+ 		  and would also identify any string with the check number as having already been used and not allow the
+ 		  user to make an entry even if the check had not been used.
+		- It would also display output of all database entriescontaining the check number entered by the user.
+		- Also suppressed output to screen of grep command.
+
+03/17/06 - Version 1.24 - made deposit and withdrawal menu automagically fill
+		in decimal places as zeros when none is entered for amount
+		and fee fields.
+		- cleaned up error message output in menu screen
+
+03/18/06 - Version 1.25 - cleanup up invalid input error message in mainmenu
+screens
+		- allow the user to type "h" in any menu field to bring up te help
+		file
+		
+03/19/06 - Version 1.26 - fix problem with tail complaining when no db exists
+		yet.
+		- fixed problem when path entered for backup and restore is
+		  is a directory and not a file
+		- fixed various typos in screen output messages
+		- cleaned up backup/restore invalid input error messages.
+
+03/21/06 - Version 1.49 - added ability to search databases for specific
+transactions
+		- minor adjustment to smooth out transition from balance menu
+		- minor output cleanups
+
+04/07/06 - Version 1.5 - fixed installer bug when checking for root
+		- fixed no execute permissions on OpenBSD when installed as
+		root
+		- fixed Windoze(tm) install problems
+		- fixed typos
+
+11/01/06 - Version 1.51 - added ability to limit comment field input to only 32
+		characters since anything > will mess up formatting of output.
+
+11/14/06 - Version 1.52
+		- change formatting of date field in database (remove slashes)
+		- entering date is now easier since there is no need to enter slashes
+		- add a rcord number field to make each record havea unique
+			identifier (up to 99999 records are supported)
+
+01/23/07 -  Version 1.53
+		- add ability to delete records
+		- allow confirm delete
+		- fix bug in loop
+
+01/24/07 - Version 1.54
+		- update help file and install recommended terminal size to
+			 reflect added record number colum....updated to 115px
+		- fix bug so that when all entries are deleted, and user wants
+			 to list the entires in the database, a message is
+			 displayed informing him/her that no records exist.
+		- fixed some typos, code clean up
+		- fix bug in loop when user has already searched and then
+			goes to check balance
+		- bug fix, clear error message when bad check number entered
+			followed by a blank check number entry
+		- added ability to verify item was deleted, show updated
+			balance to user and ask if he/she wants to delete again
+
+01/28/07 - Version 1.55
+		- installer fixes
+			- fix typos/change screen output messages
+			- fix input loop in assumeroot() for CYGWIN
+			- remove echo -e commands to make copmatible with
+				ubuntu's /bin/sh
+			- streamline help message display
+			- fix prob with testing if chkbk home already exists
+			- general code cleanup and improvements of exception handling
+
+02/08/07 - Version 1.55
+		- records are now entered in chronological order automagically
+			and totals recalculated
+

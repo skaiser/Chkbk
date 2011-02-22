@@ -1,0 +1,142 @@
+				HELPFILE for ChkBk Version 1.54
+
+Thanks for using ChkBk....Enjoy!
+
+ The recommended terminal size settings to use ChkBk are at least 115x40 or just make it full screen.
+	The program should look fine at the usual default settings of 80x24
+	but will look ugly when you try to check your balance.
+
+
+DEPENDENCIES
+	Bourne Shell (sh) and AWK and a printer if you want to print (which implies
+		printer software such as CUPS)
+	Hint: If you are using linux or one of the BSD's you probably already have these.
+
+
+INSTALLATION
+
+	ChkBk as of version 1.2 has an install script. It can be run as root or as a normal
+	user.  If run as root, the installer will attempt to make a .chkbk directory in all users
+	homes if their homes are located in /home. The installer will then install the main chkbk
+	program to /usr/local/bin. Obviously, these values can be changed by editing the install.sh
+	script-more on this in CONFIGURATION below.
+	If run as a normal user, the installer will ask if the user wants to make a .chkbk
+	directory in his/her home and install the chkbk program to $HOME/bin and update .bash_profile(linux)
+	to reflect the new path, if necessary.  The alternate choice for installing as normal user is 
+	to just make a chkbk directory in the user's home and put chkbk in there.
+	
+	
+	Linux/BSD (replace <version> with chkbk version you downloaded)
+	- extract the archive:
+		tar xvzf chkbk-<version>.tar.gz
+	- change to chkbk directory
+		cd chkbk-<version>
+	- run install script
+		./install.sh
+	
+	
+	Windows
+	- install cygwin
+		http://cygwin.com/setup.exe
+
+	- make sure you install and awk/gawk with cygwin (should be installed by default)
+
+	- then extract the archive using winrar or some other exrtraction utility
+		into your cygwin home folder (default location
+		is c:\cygwin\home\<username> )
+	- start cygwin
+		double-click Cygwin icon on desktop
+	- change to directory you named chkbk when you extracted it (HINT: type ls at the
+	  command prompt if you don't know what it is. You should see something referring 
+	  to chkbk)
+	  	type: cd chkbk-<version>
+		  or 
+		cd <directory that shows up when you type ls above>
+	- run install script
+		./install.sh
+
+	- NOTE: there is a problem with the PATH not getting exported
+	  in Windows. This means that even if you choose the "bin" install,
+	  you will not be able to run chkbk by just typing "chkbk" at the
+	  prompt. To work around this just copy the chkbk script to the
+	  /usr/local/bin directory under where cygwin is installed.
+		Example:
+		cp bin/chkbk /usr/local/bin  	
+
+CONFIGURATION
+
+	It is possible to change the default values for things such as the
+	default location to save the database to by changing the variable 
+	constants at the start of the chkbk or install.sh script:
+	  ex. to change the place where is chk.db is backed up to
+		by default, open up chkbk and edit the line:
+		C_DEFAULT="chk.db.bak" 
+			to say
+		C_DEFAULT="path to wherever you wanna save to"
+	
+	If your users home directories are in a different location other than /home,
+	you need to edit install.sh functions makehomes() and gethomes() to reflect 
+	the alternate location. For example,
+	default find homes command in gethomes():
+		homes="$(ls /home | grep -v "lost+found" > "$TMP")"
+	if your homes are in /mnt/data/home, change this to:
+		homes="$(ls /mnt/data/home | grep -v "lost+found" > "$TMP")"
+
+	The location where chkbk is installed as root is in the CHKBK_ROOT_BIN variable
+	in the variables section of the script. There are other things here, but changing 
+	them is not recommended unless you really know what you are doing :)
+
+	
+USAGE
+	
+	To run ChkBk:
+	If you installed as root or normal user with the "bin" option,
+	- just type chkbk at the prompt as any user
+	
+	If you installed as normal user with "alt" option(i.e, installed to $HOME/chkbk
+	not $HOME/.chkbk)
+	
+	- change to the directory where chkbk is located:
+		cd /home/<username>/chkbk
+	- run the script chkbk
+		./chkbk
+
+	Menu Navigation
+	- To choose a feature just select the letter surrounded by
+	  parentheses-except for the copyright logo (C), obviously.
+	- Typing '"h"' in most any menu field will bring open the help file.
+	- When in the dposit or withdrawal screens for savings or checking,
+	  enter a "q" in any field and you will exit back to the menu.
+	  If you make a mistake in one of the fields just hit enter and either
+	  the field will clear or move to the next field.  If the cursor moves
+	  to the next field just type a dash "-" and the previous field will
+	  cleared and the cursor will move there for you to re-enter the data.
+	- When in doubt of how to leave a screen type a "q"
+
+
+LICENSE
+	
+	This program and all its components are licensed under the GPL and
+	comes with ABSOLUTELY NO WARRANTY.
+	The license can be found and read in the file LICENSE.txt.
+
+
+KNOWN BUGS
+
+	This system has been tested on various linux distributions, OpenBSD,
+	Mac OS X, Windows (under CYGWIN). It has been found not to work
+	properly on FreeBSD due to FreeBSD's implemention of tput. 
+	
+	Mac OS - only "alt" install works
+	Windows - PATH soes not update properly during "bin" install as normal
+		user.
+
+
+CONTACT
+	To contact the author or to report a bug, send a nice, friendly
+	email to freesol29 AT gmail DOT com.
+
+
+(C) Copyright 2005 Stephen M. Kaiser 
+
+

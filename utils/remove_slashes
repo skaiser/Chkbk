@@ -1,0 +1,8 @@
+cp -f "$1" "$1".bak
+#sed -n 's/\///gw zzz' "$1".bak && sed -n 's/\^na\^/\^n\/a\^/gw "$1"' zzz
+sed -n 's/\///gw zzz' "$1".bak
+sed -n 's/\^na\^/\^n\/a\^/gw zzztmp' zzz
+cp -f zzztmp "$1"
+rm zzztmp
+rm zzz
+tail "$1"

@@ -1,0 +1,1 @@
+sed = sav.db.bak | sed 'N;s/\n/^/w sav.db'

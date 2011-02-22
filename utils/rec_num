@@ -1,0 +1,15 @@
+#!/bin/ksh
+i="$(tail -1 sav.db | cut -d'^' -f 1)"
+j=0
+echo "i =" $i""
+#((j = i + 1))
+let "j = i + 1"
+echo "j=" $j""
+
+while cut -d'^' -f 1 sav.db | grep "^$j" > zzz
+do
+  let "j = j + 1"
+ echo "j = "$j""
+done
+
+echo "$j"

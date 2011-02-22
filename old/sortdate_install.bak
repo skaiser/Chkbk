@@ -1,0 +1,142 @@
+#!/bin/sh
+
+#################### Begin Variables ########################
+VERSION="1.54"
+HELP="$HOME/.chkbk/HELP.txt"
+LICENSE="$HOME/.chkbk/LICENSE.txt"
+S_DEFAULT="$HOME/.chkbk/sav.db.bak"
+C_DEFAULT="$HOME/.chkbk/chk.db.bak"
+SAVDB="$HOME/.chkbk/sav.db"
+CHKDB="$HOME/.chkbk/chk.db"
+TMPDB="$HOME/.chkbk/new.db"
+TMPDB2="$HOME/.chkbk/tmpdb2"
+TMPDB3="$HOME/.chkbk/tmpdb3"
+TMPDB4="$HOME/.chkbk/tmpdb4"
+TMPFILE="$HOME/.chkbk/tmpfile"
+NEWTMP="$HOME/.chkbk/newtmp"
+SUBTMP="$HOME/.chkbk/subtmp"
+OUTPUTF="$HOME/.chkbk/balance.txt"
+########################################################
+#####debug code
+echo "enter s or c"
+read whichdb
+case $whichdb in 
+  [s]) DB="$SAVDB" ;;
+  [c]) DB="$CHKDB" ;;
+esac
+
+#########33
+sort -n -t '^' -k4 "$DB" > "$TMPDB4"
+
+  # get first line of file to start us off
+head -1 "$TMPDB4" > "$NEWTMP"
+
+  # get end of file so we can tell the while loop when to stop looping
+eof="$(tail -1 "$TMPDB4" | cut -d '^' -f 1)"
+ 
+  # get record from first line to start us with
+start_record="$(cut -d '^' -f 1 "$NEWTMP")"
+
+  # set next record to start_record to get us started, but still keep starting value
+record="$start_record"
+
+  # do this for every line until we get to the last line in the file
+while test "$record" != "$eof"
+  do
+      # get line matching current record and send it to temp db
+    sed -n "/^$record/p" "$TMPDB4" > "$TMPDB"
+
+      # get line immediatley following current record and append 
+      # it to temp db
+    sed -n "/^$record/{n;p;}" "$TMPDB4" >> "$TMPDB"
+
+###3      # well, this is what really allows us to keep getting new
+#####33      # lines until we have no more...
+##########3    record="$(tail -1 "$TMPDB" | cut -d '^' -f 1)"
+
+#########3debug code
+cat "$TMPDB" ; read nextstep
+##########33
+
+      # get total amount from the line containing the current
+      # record number (the oldest record by date) so we can use it
+      # to become the new starting total for the next line and which
+      # we will user to add or subtract the transaction amount to to
+      # get the new total for the next record (youngest record by date)
+      # does this makes sense to you??? because it sure as hell is
+      # confusing me... 
+########3    older_total="$(head -1 "$TMPDB" | cut -d '^' -f 10)"
+    older_total="$(grep "^"$record"" "$NEWTMP" | cut -d '^' -f 10)"
+
+      # get amount to be deleted defaulting to a deposit transaction
+    trans_amt="$(tail -1 "$TMPDB" | cut -d '^' -f 9)"
+
+      # get fee amount to be recalculated
+    fee="$(tail -1 "$TMPDB" | cut -d '^' -f 8)"
+ 
+      # test whether the transaction was actually a deposit
+      # if not, get amount to be deleted from withdrawal field
+    if test "$trans_amt" = ""
+      then
+          # set variable to denote which typo de transaction
+          # we have..."w" stands for withdrawal
+        trans_type=w
+          # this is the withdrawal field
+        trans_amt="$(tail -1 "$TMPDB" | cut -d ^ -f 6)"
+    else
+          # else set transaction variable to type "d" for, you
+          # guessed it, deposit...
+        trans_type=d
+    fi
+
+      # write the values to be calculated to a temp file for use with awk
+    echo ""$trans_amt"^"$older_total"" > "$TMPFILE"
+##########33debod code
+    echo "trans amt is : "$trans_amt" and older total is : "$older_total"" ; read nextstep 
+##################
+      # calculate what the new total for the next date(youngest) will be
+      # but first, test to see whether it was a deposit or withdrawal
+    if test "$trans_type" = "w"   
+      then
+          # repeat withdrawal transaction
+        younger_total="$(cut -d "^" -f 2,1 "$TMPFILE" | awk -F '^' '{ print $2 - $1 }')"
+      else
+          # repeat deposit
+        younger_total="$(cut -d "^" -f 2,1 "$TMPFILE" | awk -F '^' '{ print $2 + $1 }')"
+    fi
+
+      # well, this is what really allows us to keep getting new
+      # lines until we have no more...
+    record="$(tail -1 "$TMPDB" | cut -d '^' -f 1)"
+
+        # set new field amounts to be rewritten for updated db
+    field1="$record"
+    field2="$older_total"
+    field3="$(tail -1 "$TMPDB" | cut -d '^' -f 3)"
+    field4="$(tail -1 "$TMPDB" | cut -d '^' -f 4)"
+    field5="$(tail -1 "$TMPDB" | cut -d '^' -f 5)"
+    field6="$(tail -1 "$TMPDB" | cut -d '^' -f 6)"
+    field7="$(tail -1 "$TMPDB" | cut -d '^' -f 7)"
+    field8="$(tail -1 "$TMPDB" | cut -d '^' -f 8)"
+    field9="$(tail -1 "$TMPDB" | cut -d '^' -f 9)"
+    field10="$younger_total"
+      
+    echo ""$field1"^"$field2"^"$field3"^"$field4"^"$field5"^"$field6"^"$field7"^"$field8"^"$field9"^"$field10"" >> "$NEWTMP"
+
+
+  done
+##### end of while statement
+
+
+##############3debug code
+echo "newtmp is now this"
+cat "$NEWTMP"
+echo "this should be the new file in order and recalculated"
+read nextstep
+#########3
+
+cp -f "$NEWTMP" "$DB"
+
+rm "$NEWTMP"
+###########3
+

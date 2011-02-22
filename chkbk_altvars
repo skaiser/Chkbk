@@ -1,0 +1,1197 @@
+#!/bin/sh
+# =============================================================================
+# Script:	chkbk
+# By:		SMK
+# Date:		04/07/05
+# Purpose:	main menu for chkbk program
+#
+# License:      GPL
+# License file  LICENSE.txt
+# Email:        freesol29@gmail.com
+#
+# Copyright (C) 2005 Stephen M. Kaiser
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version
+# 2 of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# =============================================================================
+
+#################### Begin Variables ########################
+VERSION="1.5"
+HELP="$HOME/chkbk/HELP.txt"
+LICENSE="$HOME/chkbk/LICENSE.txt"
+S_DEFAULT="$HOME/chkbk/sav.db.bak"
+C_DEFAULT="$HOME/chkbk/chk.db.bak"
+SAVDB="$HOME/chkbk/sav.db"
+CHKDB="$HOME/chkbk/chk.db"
+TMPDB="$HOME/chkbk/new.db"
+TMPFILE="$HOME/chkbk/tmpfile"
+OUTPUTF="$HOME/chkbk/balance.txt"
+
+loop=y
+
+#################### End Variable Section ###################
+
+#################### Begin Functions ########################
+####
+## Print Main menu to scren
+##
+####
+mainmenu()
+{
+while test "$loop" = "y"
+  do
+	clear
+	tput cup 4 29   ; echo "Main Menu"
+	tput cup 5 23   ; echo "===================="
+	tput cup 6 25   ; echo "(S) Savings"
+	tput cup 7 25   ; echo "(C) Checking"
+	tput cup 8 25	; echo "(B) Backup"
+	tput cup 9 25   ; echo "(R) Restore"
+	tput cup 12 25  ; echo "(Q) Quit"
+	tput cup 15 20  ; echo "Enter choice: "
+	tput cup 20 17	; echo "(H) Help  (A) About  (L) License" 
+	tput cup 21 14  ; echo "(C) Copyleft 2005 by Stephen M. Kaiser"
+  ### Display Welcome to ChkBk message as an animation
+	tput cup 2 18   ; echo -n "W " ; sleep 0.01 ; echo -n "e " ; sleep 0.01 ; echo -n "l " ; sleep 0.01 ; echo -n "c " ; sleep 0.01 ; echo -n "o " ; sleep 0.01 ; echo -n "m " ; sleep 0.01 ; echo -n "e " ; sleep 0.01 ; echo -n "  t " ; sleep 0.01 ; echo -n "o  " ; sleep 0.01 ; echo -n " C " ; sleep 0.01 ; echo -n "h " ; sleep 0.01 ; echo -n "k " ; sleep 0.01 ; echo -n "B " ; sleep 0.01 ; echo -n "k "
+	tput cup 15 34  ; read choice
+
+
+#### Begin case
+	case $choice in
+		[Ss]) DB="$SAVDB" ; printmenus ;; # change variable so it doesn't bother constants
+		[Cc]) DB="$CHKDB" ; printmenuc ;; # change variable so it doesn't bother constants
+		[Bb]) backupmenu  ;;
+		[Rr]) restoremenu ;;
+		[Hh]) less "$HELP" ;;
+		[Aa]) tput cup 22 22 ; echo ChkBk Version "$VERSION" ; tput cup 23 19 ; echo "Press <ENTER> to continue" ; read prompt ;;
+		[Ll]) less "$LICENSE" ;; 
+		[Qq]) clear ; exit	;;
+		   *) invaliderror ;; 
+	esac
+#### End case
+
+
+done
+#### End while
+
+}
+
+
+####
+## print main chkmenu
+##
+####
+printmenuc()
+{
+while test "$loop" = "y"
+  do
+	clear
+	tput cup 4 29   ; echo "Checking"
+	tput cup 5 23  	; echo "===================="
+	tput cup 6 25   ; echo "(D) Deposit"
+	tput cup 7 25   ; echo "(W) Withdrawal"
+	tput cup 8 25   ; echo "(C) Check Balance"
+	tput cup 9 25   ; echo "(S) Search Database"
+	tput cup 12 25  ; echo "(Q) Quit"
+	tput cup 15 20  ; echo "Enter choice: "
+	tput cup 15 34  ; read choice2
+
+	case $choice2 in
+		[Dd]) menu  ;;
+		[Ww]) menu  ;;
+		[Cc]) if test -e "$DB"
+			then
+			  balmenu
+			else
+			  neednewdb
+		      fi ;;
+		[Ss]) if test -e "$DB"
+			then
+			  searchmenu
+			else
+			   neednewdb
+		      fi ;;
+		[Hh]) less "$HELP" ;;
+		[Qq]) mainmenu	;;
+		   *) invaliderror ;;
+	esac
+  done
+}
+
+
+
+####
+## print main savings menu
+##
+####
+printmenus()
+{
+while test "$loop" = "y"
+  do
+	clear
+	tput cup 4 29   ; echo "Savings"
+	tput cup 5 23  	; echo "===================="
+	tput cup 6 25   ; echo "(D) Deposit"
+	tput cup 7 25   ; echo "(W) Withdrawal"
+	tput cup 8 25   ; echo "(C) Check Balance"
+	tput cup 9 25   ; echo "(S) Search Database"
+	tput cup 12 25  ; echo "(Q) Quit"
+	tput cup 15 20  ; echo "Enter choice: "
+	tput cup 15 34  ; read choice2
+
+	case $choice2 in
+		[Dd]) menu  ;;
+		[Ww]) menu  ;;
+		[Cc]) if test -e "$DB"
+			then
+			  balmenu
+			else
+			  neednewdb
+		      fi ;;
+		[Ss]) if test -e "$DB"
+			then
+			  searchmenu
+			else
+			   neednewdb
+		      fi ;;
+		[Hh]) less "$HELP" ;;
+		[Qq]) mainmenu	;;
+		   *) invaliderror ;;
+	esac
+  done
+}
+
+
+
+####
+## Print Backup menu
+##
+####
+backupmenu()
+{
+while test "$loop" = "y"
+do
+  clear
+  tput cup 4 29 ; echo "Backup?"
+  tput cup 5 23	; echo "===================="
+  tput cup 6 25	; echo "(S) Savings"
+  tput cup 7 25	; echo "(C) Checking"
+  tput cup 12 25; echo "(Q) Quit"
+  tput cup 15 20; echo "Enter Choice: "
+  tput cup 15 34; read choice3
+
+	case $choice3 in
+		# change variables so they don't affect the constants
+	[Ss]) DB="$SAVDB" ; DB_DEF="$S_DEFAULT" ; pathb ;;
+	[Cc]) DB="$CHKDB" ; DB_DEF="$C_DEFAULT" ; pathb ;;
+	[Hh]) less "$HELP" ;;
+	[Qq]) mainmenu ;;
+	*) invaliderror ;;
+	esac 
+
+done
+}
+
+
+
+####
+## Print restore menu
+##
+####
+restoremenu()
+{
+while test "$loop" = "y"
+do
+  clear
+  tput cup 4 29	; echo "Restore?"
+  tput cup 5 23 ; echo "===================="
+  tput cup 6 25	; echo "(S) Savings"
+  tput cup 7 25	; echo "(C) Checking"
+  tput cup 12 25; echo "(Q) Quit"
+  tput cup 15 20; echo "Enter Choice: "
+  tput cup 15 34; read choice3
+
+	case $choice3 in
+		# change variables so they don't affect the constants
+	[Ss]) DB="$SAVDB" ; DB_DEF="$S_DEFAULT" ; pathr ;;
+	[Cc]) DB="$CHKDB" ; DB_DEF="$C_DEFAULT" ; pathr ;;
+	[Hh]) less "$HELP" ;;
+	[Qq]) mainmenu ;;
+	*) invaliderror ;;
+	esac 
+
+
+done
+}
+
+
+
+####
+## print data entry menu
+##
+####
+menu()
+{
+  clear
+  menuloop="y"
+  while test "$menuloop" = "y"
+  do 	
+    tput cup 4 29  ; echo "Enter Info"
+    tput cup 5 23  ; echo "===================="
+    tput cup 6 25  ; echo "Check#  : "
+    tput cup 7 25  ; echo "Date    :           (MM/DD/YY)" 
+    tput cup 8 25  ; echo "Comment : "
+    tput cup 9 25  ; echo "Amount  : "
+    tput cup 10 25 ; echo "Code    : "
+    tput cup 11 25 ; echo "Fee     : "
+    tput cup 6 35  ; read checknum 
+    if test "$checknum" = "q"
+      then
+		case $choice in
+		[Ss]) printmenus ;;
+		[Cc]) printmenuc ;;
+		esac
+      elif test "$checknum" = "h"
+	  	then
+		less "$HELP" ; menu
+      else
+	if test "$checknum" = ""	# allow blank check no.
+	  then 
+		date
+	  else				# verify that check has between 3 and 4 digits
+           	case "$checknum" in
+	  	  [0-9][0-9][0-9]) menuloop="n" ; checkchk ; clearerror ; date ;;
+	  	  [0-9][0-9][0-9][0-9]) menuloop="n" ; checkchk ; clearerror ; date ;;
+	  	  *) tput cup 6 35  ; echo "                             "
+	     	     tput cup 20 25 ; echo "BAD check#. Check numbers can range"
+		     tput cup 21 25 ; echo "from 000-9999" ;;
+        	esac
+	fi
+    fi
+  done
+}
+
+
+
+####
+## make sure of no duplicate check no. entries
+##
+####
+checkchk()	
+{
+if test -e "$DB"
+then
+while cut -d "^" -f 2-7 "$DB" | grep "^$checknum" > "$TMPFILE"
+  do
+  	tput cup 20 25 ; echo "This number has already been assigned to: "
+        tput cup 22 1  ; tr '^' ' ' < "$TMPFILE"
+        echo ; echo "Press ENTER to continue... "  	
+	read prompt
+ 	menu
+  done
+fi
+}
+
+
+
+####
+## get date and verify format
+##
+####
+date()		
+{
+  dateloop="y"
+  while test "$dateloop" = "y"
+    do
+      	tput cup 7 35 ; read date
+        case "$date" in
+	  [1][0-2]/[0][1-9]/[0-9][0-9]) dateloop="n" ; clearerror ; comment;;
+	  [1][0-2]/[1-2][0-9]/[0-9][0-9]) dateloop="n" ; clearerror ; comment;;
+	  [1][0-2]/[3][0-1]/[0-9][0-9]) dateloop="n" ; clearerror ; comment;;
+          [0][1-9]/[0][1-9]/[0-9][0-9]) dateloop="n" ; clearerror ; comment ;;
+          [0][1-9]/[1-2][0-9]/[0-9][0-9]) dateloop="n" ; clearerror ; comment ;;
+	  [0][1-9]/[3][0-1]/[0-9][0-9]) dateloop="n" ; clearerror ; comment;;
+          [-]) while test "$date" = "-"
+                 do
+		   menu
+	         done ;;
+	  [Hh]) less "$HELP"
+                tput cup 7 35  ; echo "          (MM/DD/YY)        " ;;  
+          [Qq]) case $choice in
+		[Ss]) printmenus ;;
+		[Cc]) printmenuc ;;
+		esac ;;
+            *)  tput cup 7 35  ; echo "          (MM/DD/YY)        "  
+		tput cup 21 25 ; echo "BAD date format"
+                  ;;
+        esac
+    done
+}
+
+
+
+####
+## get comment field and disallow '^', '/', and '|' characters
+##
+####
+comment()	
+{
+  commentloop="y"
+  while test "$commentloop" = "y"
+    do
+	tput cup 8 35	; read comment
+	case "$comment" in
+	*['^']*) clearerror ; tput cup 20 25 ; echo "Sorry but the ^ character is not allowed"
+		 tput cup 21 25 ; echo "due to its use in the database"
+		 tput cup 8 35  ; echo "                                        " ;;
+	*['|']*) clearerror ; tput cup 20 25 ; echo -e "Sorry but the | character is not allowed for security reasons\n"
+		 tput cup 8 35  ; echo "                                        " ;;
+	*['/']*) clearerror ; tput cup 20 25 ; echo -e "Sorry but the / character is not allowed for security reasons\n"
+		 tput cup 8 35 ; echo "                                        " ;;
+	[-]) while test "$comment" = "-"
+		do 
+		  tput cup 8 35 ; echo "  "
+		  tput cup 7 35 ; echo "         " ; clearerror ; date
+		done ;;
+	[Hh]) less "$HELP"
+	      tput cup 8 35 ; echo "                                          " ;;
+	[Qq]) case $choice in
+		[Ss]) printmenus ;;
+		[Cc]) printmenuc ;;
+		esac ;;
+	*) commentloop="n" ; clearerror ; amount ;;
+	esac
+    done
+}
+
+
+
+####
+## get amt of transaction and verify in dollar format
+## allow up to $999999.99 dollars to be entered
+####
+amount()	
+{
+  amountloop="y"
+  while test "$amountloop" = "y"
+    do
+	tput cup 9 35 	; read amount
+	case "$amount" in
+	# allow user to enter amount without ending zeros and fill the zeros in
+	  [0-9]) amountloop="n" ; type="a" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9]) amountloop="n" ; type="a" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9]) amountloop="n" ; type="a" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9]) amountloop="n" ; type="a" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9][0-9]) amountloop="n" ; type="a" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9][0-9][0-9]) amountloop="n" ; type="a" ; addzeroz ; clearerror ; code ;;
+	# amount entered with one decimal place- auto add one zero to the end
+	  [0-9].[0-9]) amountloop="n" ; type="a1" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9].[0-9]) amountloop="n" ; type="a1" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9].[0-9]) amountloop="n" ; type="a1" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9].[0-9]) amountloop="n" ; type="a1" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9][0-9].[0-9]) amountloop="n" ; type="a1" ; addzeroz ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9][0-9][0-9].[0-9]) amountloop="n" ; type="a1" ; addzeroz ; clearerror ; code ;;
+	# amount entered with both decimal places
+	  [0-9].[0-9][0-9]) amountloop="n" ; clearerror ; code ;;
+	  [1-9][0-9].[0-9][0-9]) amountloop="n" ; clearerror ; code ;;
+	  [1-9][0-9][0-9].[0-9][0-9]) amountloop="n" ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9].[0-9][0-9]) amountloop="n" ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9][0-9].[0-9][0-9]) amountloop="n" ; clearerror ; code ;;
+	  [1-9][0-9][0-9][0-9][0-9][0-9].[0-9][0-9]) amountloop="n" ; clearerror ; code ;;
+	  [-]) while test "$amount" = "-"
+		 do
+		   tput cup 9 35 ; echo "  "
+		   tput cup 8 35 ; echo "                                        " ; clearerror ; comment
+		 done ;;
+	  [Hh]) less "$HELP"
+	        tput cup 9 35 ; echo "                                          " ;;
+	  [Qq]) case $choice in
+		[Ss]) printmenus ;;
+		[Cc]) printmenuc ;;
+		esac ;;
+	  *) tput cup 9 35  ; echo "                            "
+	     tput cup 21 25 ; echo "BAD amount. Please enter a dollar amount" ;;
+        esac
+    done
+}
+
+
+####
+## add zeros to amount or fee if only the first part of the number is entered
+## This is intended to ease use by allowing the user to only have to input
+## 11 instead of 11.00 for an $11.00 transaction
+####
+addzeroz()
+{
+if test "$type" = "a"
+  then
+	amount="$amount".00
+	tput cup 9 35  ; echo "$amount"
+  elif test "$type" = "a1"
+    then
+	amount="$amount"0
+	tput cup 9 35  ; echo "$amount"
+  elif test "$type" = "f"
+    then
+	fee="$fee".00
+	tput cup 11 35 ; echo "$fee"
+  elif test "$type" = "f1"
+    then
+	fee="$fee"0
+	tput cup 11 35  ; echo "$fee"
+  else
+	tput cup 21 25 ; echo "INVALID TYPE! TRY AGAIN..."
+	if test "$fee" = ""
+	  then
+		clearerror ; amount
+	  else 
+		clearerror ; fee
+	fi
+fi
+}
+
+
+
+
+####
+## get any single char code from user for the transaction if one exists
+##
+####
+code()		
+{
+  codeloop=y
+  while test "$codeloop" = "y"
+    do
+	tput cup 10 35	; read code
+	if test "$code" = ""
+	  then 
+		clearerror ; fee
+          else
+	    case "$code" in
+	      [Qq]) case $choice in
+		    [Ss]) printmenus ;;
+		    [Cc]) printmenuc ;;
+		    esac ;;
+	      [0-9a-zA-Z]) codeloop="n" ; clearerror ; fee ;;
+	      [-]) while test "$code" = "-"
+		   do
+		     tput cup 10 35 ; echo "  "
+		     tput cup 9 35  ; echo "          " ; clearerror ; amount
+		   done ;;   
+	      [Hh]) less "$HELP"
+	            tput cup 10 35 ; echo "                                          " ;;
+	      
+	      *) tput cup 10 35 ; echo "                     "
+	         tput cup 21 25 ; echo "BAD code. Please enter a single letter or number" ;;
+	    esac
+	fi
+    done
+}
+
+
+
+####
+## get fee amt of transaction if one exists
+## allow up to $999.99 fee-seems a bit excessive, 
+## but who knows?
+####
+fee()		
+{
+  feeloop=y
+  while test "$feeloop" = "y"
+    do
+	tput cup 11 35 	; read fee
+	if test "$fee" = ""
+	  then
+	    clearerror ; printvalues
+	  else
+	    case "$fee" in
+	  # allow user to enter amount without ending zeros and fill the zeros in
+	    [0-9]) feeloop="n" ; type="f" ; addzeroz ; clearerror ; printvalues ;;
+	    [1-9][0-9]) feeloop="n" ; type="f" ; addzeroz ; clearerror ; printvalues ;;
+	    [1-9][0-9][0-9]) feeloop="n" ; type="f" ; addzeroz ; clearerror ; printvalues ;;
+	  # allow user to enter amount with only one decimal point filled in 
+	    [0-9].[0-9]) feeloop="n" ; type="f1" ; addzeroz ; clearerror ; printvalues ;;
+	    [1-9][0-9].[0-9]) feeloop="n" ; type="f1" ; addzeroz ; clearerror ; printvalues ;;
+	    [1-9][0-9][0-9].[0-9]) feeloop="n" ; type="f1" ; addzeroz ; clearerror ; printvalues ;;
+	  # fee amount entered with decimal places	
+	    [0-9].[0-9][0-9]) feeloop="n" ; clearerror ; printvalues ;;
+	    [1-9][0-9].[0-9][0-9]) feeloop="n" ; clearerror ; printvalues;;
+	    [1-9][0-9][0-9].[0-9][0-9]) feeloop="n" ; clearerror ; printvalues ;;
+	    [-]) while test "$fee" = "-"
+		   do
+		     tput cup 11 35 ; echo "  "
+		     tput cup 10 35 ; echo "  " ; clearerror ; code
+		   done ;;
+	    [Hh]) less "$HELP"
+	          tput cup 11 35 ; echo "                                          " ;;
+	    [Qq]) case $choice in
+		  [Ss]) printmenus ;;
+		  [Cc]) printmenuc ;;
+		  esac ;;
+	    *) tput cup 11 35 ; echo "                        "
+	       tput cup 21 25 ; echo "BAD fee. Please enter a dollar amount." ;;
+            esac
+	fi
+    done
+}
+
+
+####
+## clear any error output from menu screen
+##
+####
+clearerror()
+{
+  tput cup 20 25 ; echo "                                                                       "
+  tput cup 21 25 ; echo "                                                                       "
+}
+
+
+
+
+####
+## show the user the values he/she entered and ask
+## if they are ok...then send to the appropriate
+## calc function based on input in step 1 or 
+## start allover again
+####
+printvalues()		
+{
+#echo "You entered:"
+#echo "check #"$checknum" : date "$date" : desc "$comment" : amount "$amount" : code "$code" : fee "$fee""
+#echo "check #: "$checknum""
+#echo "date   : "$date""
+#echo "comment: "$comment""
+#echo "amount : "$amount""
+#echo "code   : "$code""
+#echo "fee    : "$fee""
+    tput cup 4 29  ; echo "You Entered:"
+    tput cup 5 23  ; echo "===================="
+    tput cup 6 25  ; echo "Check#  : "$checknum""
+    tput cup 7 25  ; echo "Date    : "$date"" 
+    tput cup 8 25  ; echo "Comment : "$comment""
+    tput cup 9 25  ; echo "Amount  : "$amount""
+    tput cup 10 25 ; echo "Code    : "$code""
+    tput cup 11 25 ; echo "Fee     : "$fee""
+echo
+echo -en "\nDo you wish to save these values (y/n)? "
+read save
+if test "$save" = "y"
+  then
+	case "$choice2" in
+	  [Dd]) calcdeposit ;;
+	  [Ww]) calcwithdrawal ;;
+	esac
+  else
+	echo -en "\n\nWould you like to start again (y/n)? "
+	read nloop
+	if test "$nloop" = "y"
+          then
+		menu
+          else
+	    	mainmenu
+	fi
+fi
+}
+
+
+
+####
+## calculate a deposit transaction
+##
+####
+calcdeposit()		
+{
+if test "$fee" = ""
+	then fee="0.00"		# this is just to make output prettier
+fi
+deposit="$amount"
+withdrawal=""
+	# get total from previous transaction
+oldtotal="$(tail -1 "$DB" 2> /dev/null | cut -d '^' -f 9)"
+echo ""$oldtotal"^"$deposit"^" > "$TMPDB"
+	# calc total(without fee) of this new transaction
+newtotal="$(tail -1 "$TMPDB" | cut -d '^' -f 1,2 | awk -F '^' '{ print $1+$2 }')"
+echo ""$newtotal"^"$fee"" > "$TMPDB"
+	# calc total including fee
+total="$(cut -d '^' -f 1,2 "$TMPDB" | awk -F '^' '{ print $1-$2 }')"
+	# show transaction with new balance to user			
+echo
+echo "Previous Balance: $"$oldtotal" + Deposited $"$deposit" - Fee: $"$fee" = New Balance: $"$total""
+	# make db prettier for output later
+if test "$code" = ""
+  then code="n/a"
+fi
+	# write values to database
+echo ""$oldtotal"^"$checknum"^"$date"^"$comment"^"$withdrawal"^"$code"^"$fee"^"$deposit"^"$total"" >> "$DB"
+echo -en "\n\nWould you like to make another deposit (y/n)?"
+read dloop
+if test "$dloop" = "y"
+  then
+	menu
+  else
+	mainmenu
+fi
+}
+
+
+
+####
+## calculate a withdrawal transaction
+##
+####
+calcwithdrawal()	
+{
+if test "$fee" = ""
+  then fee="0.00"		# this is just to make output prettier
+fi
+deposit=""
+withdrawal="$amount"
+	# get total from previous transaction
+oldtotal="$(tail -1 "$DB" 2> /dev/null | cut -d '^' -f 9)"
+echo ""$oldtotal"^"$withdrawal"^" > "$TMPDB"
+	# calc total(without fee) of this new transaction
+newtotal="$(tail -1 "$TMPDB" | cut -d '^' -f 1,2 | awk -F '^' '{ print $1-$2 }')"
+echo ""$newtotal"^"$fee"" > "$TMPDB"
+	# calc total including fee
+total="$(cut -d '^' -f 1,2 "$TMPDB" | awk -F '^' '{ print $1-$2 }')"
+	# show transaction with new balance to user			
+echo
+echo "Previous Balance: $"$oldtotal" - Withdrawn: $"$withdrawal" - Fee: $"$fee" = New Balance: $"$total""
+	# make db prettier for output later
+if test "$code" = ""
+  then code="n/a"
+fi
+	# write vals to db
+echo ""$oldtotal"^"$checknum"^"$date"^"$comment"^"$withdrawal"^"$code"^"$fee"^"$deposit"^"$total"" >> "$DB"
+echo -en "\n\nWould you like to make another withdrawal (y/n)?"
+read wloop
+if test "$wloop" = "y"
+  then
+	menu
+  else
+	mainmenu
+fi
+}
+
+
+
+####
+## print menu for checking balance
+##
+####
+balmenu()
+{
+balloop=y
+while test "$balloop" = "y"
+  do
+	clear
+	tput cup 4 29   ; echo "Balance"
+	tput cup 5 23  	; echo "===================="
+	tput cup 6 25   ; echo "(C) Current Balance"
+	tput cup 7 25   ; echo "(V) View Last 10 "
+	tput cup 8 25   ; echo "(D) Entire Database"
+	tput cup 9 25   ; echo "(M) Manually Enter"
+	tput cup 12 25  ; echo "(Q) Quit"
+	tput cup 15 20  ; echo "Enter choice: "
+	tput cup 15 34  ; read balchoice
+
+	case $balchoice in
+		[Cc]) balloop=n ; curbal ;;
+		[Vv]) balloop=n ; tail -10 "$DB" > "$TMPFILE" ; showbal ;;
+		[Dd]) balloop=n ; cat "$DB" > "$TMPFILE" ; showbal ;;
+		[Mm]) balloop=n ; getnumbal ;; 
+	    	[Hh]) less "$HELP" ;;
+		[Qq]) balloop=n ; case $choice in
+			[Ss]) printmenus ;;
+			[Cc]) printmenuc ;;
+		      esac ;;
+		   *) invaliderror ;;
+	esac
+  done
+}
+
+
+####
+## Decides how many lines to print
+##
+####
+getnumbal()
+{
+bloop=y
+while test "$bloop" = "y"
+  do
+    echo -n "How many lines would you like to view? "
+    read numlines
+    case "$numlines" in
+	[1-9]) bloop=n ; tail -"$numlines" "$DB" > "$TMPFILE" ; showbal ;; 
+	[1-9][0-9]) bloop=n ; tail -"$numlines" "$DB" >"$TMPFILE" ;  showbal ;;
+	*) echo -e "\n\nInvalid number of lines...pick a number between 1-99\n"
+    esac
+  done
+}
+
+
+
+####
+## Displays current balance only
+##
+####
+curbal()
+{
+echo -e "\n============================================================================================================" > "$TMPDB"
+tail -1 "$DB" | cut -d '^' -f 9 | awk -F ' ' '{ printf("\n                                    Current Balance:     $ %-10.2f", $1) 
+print("\n\n============================================================================================================")
+}' >> "$TMPDB"
+
+cat "$TMPDB"
+askprint
+}
+
+
+
+####
+## Formats output for reading
+##
+####
+showbal()
+{
+awk ' BEGIN {
+   printf("\n%-8s %-10s %-34s %10s %10s %6s %8s %11s \n"),"CHECK#","DATE","COMMENTS","DEBIT","DEPOSIT","CODE","FEE","TOTAL"
+       print("============================================================================================================")
+        }' > "$TMPDB"
+
+        # print every line of file with separator line after it
+for line in "$TMPFILE" ; do
+awk -F'^' '{ printf("%-8s %-10s %-34s %10.2f %10.2f %6s %8.2f %11.2f \n\n"), $2,$3,$4,$5,$8,$6,$7,$9
+        print ("-----------------------------------------------------------------------------------------------------------")
+        }' $line >> "$TMPDB"
+done
+
+        # print current balance again at bottom
+echo -e "\n============================================================================================================" >> "$TMPDB"
+tail -1 "$DB" | cut -d '^' -f 9 | awk -F ' ' '{ printf("\n                                    Current Balance:     $ %-10.2f", $1) 
+print("\n\n============================================================================================================")
+}' >> "$TMPDB"
+
+cat "$TMPDB"
+
+askprint
+}
+
+
+####
+## user search menu
+##
+####
+searchmenu()
+{
+searchloop="y"
+while test "$searchloop" = "y"
+  do
+	clear
+	tput cup 5 25   ; echo "Enter search: ___________________________"
+	tput cup 6 25   ; echo '(ex. "01/01/99", "check", "Power bill")'
+	tput cup 5 39   ; read search
+
+	if test "$search" = ""
+	  then
+	    case $choice in
+		  [Ss]) printmenus ;;
+		  [Cc]) printmenuc ;;
+	    esac 
+	  elif test "$search" = "q"
+	    then
+	      case $choice in
+		  [Ss]) printmenus ;;
+		  [Cc]) printmenuc ;;
+	      esac 
+	  elif test "$search" = "Q"
+	    then
+	      case $choice in
+		  [Ss]) printmenus ;;
+		  [Cc]) printmenuc ;;
+	      esac 
+	  else
+	    searchdb
+	fi
+		
+
+  done
+}
+
+
+
+####
+## Search the database for a user defined string
+##
+####
+searchdb()
+{
+  grep -i "$search" "$DB" > "$TMPFILE"
+  read results < "$TMPFILE"
+  if test "$results" != ""
+    then
+      clear ; showbal
+    else
+      clear ; tput cup 5 25  ; echo -en "Sorry, but your search returned no results...\n"
+      pressenter
+  fi
+}
+
+
+
+
+####
+## Ask user if they wanna print and to where
+##
+####
+askprint()
+{
+ploop=y
+echo -en "\n\nDo you wanna print? (y/n) " ; read answer
+if test "$answer" = "y"
+  then
+	while test "$ploop" = "y"
+	  do
+		echo -e "\n (F) print to file balance.txt\n (P) print to system default printer" ; read answer
+		case "$answer" in
+  	  	[Ff]) ploop=n ; printfile ;;
+  	  	[Pp]) ploop=n ; printpr ;; 
+  	  	*) echo "INVALID IPNUT" ; pressenter ;; 
+		esac
+	  done  
+  else
+    if test "$searchloop" = "y"
+    then
+        echo -en "\nDo you wanna search again? (y/n) "
+        read searchloop
+    fi
+fi
+}
+
+
+
+####
+## Print output to file "$OUTPUTF"
+##
+####
+printfile()
+{
+mv -f "$TMPDB" "$OUTPUTF"
+}
+
+
+
+####
+## Print output to printer
+##
+####
+printpr()
+{
+ lpr -o landscape -o cpi=11 "$TMPDB" 
+	# lp -o cpi=16 "$TMPDB" ;; 
+	# mpage -1 -l -I10 balance.txt |lpr
+}
+
+
+
+####
+## ask where to backup db to
+##
+####
+pathb()
+{
+  echo -en "\n\nEnter the path of where to backup to: ["$DB_DEF"] "; 
+  read path;
+  if test -d "$path"
+    then
+	pathisadir
+    else
+        checkpath
+  fi
+}
+
+
+
+####
+## ask where to restore db from
+##
+####
+pathr()
+{
+  echo -en "\n\nEnter the path of the database to restore: ["$DB_DEF"] "; 
+  read path;
+  if test -d "$path"
+    then
+	pathisadir
+    else
+        checkpath
+  fi
+}
+
+
+####
+## Print error message if path entered is a directory not a file
+##
+####
+pathisadir()
+{
+  echo ; echo "Sorry, but the path you entered is a directory."
+  echo "You must specify a filename for the database."
+  case $choice in
+    [Bb]) pathb ;;
+    [Rr]) pathr ;;
+  esac
+}
+
+
+
+####
+## check to see if path is valid
+##
+####
+checkpath()
+{
+	### needs to test if file exists
+if test "$path" = ""
+  then
+	if test -e "$DB_DEF"
+	  then
+		origexist
+	  else
+		case $choice in
+		  [Bb]) copyfile ;;
+		  [Rr]) nodb ;;
+		esac		
+	fi
+  elif test -e "$path"
+	then	# set default path to path entered for ease of admin later
+	  DB_DEF="$path" ; origexist
+  elif test "$path" = "q"
+	then
+	  mainmenu
+  else 	# if path entered doesn't exist, write it for backup or error for restore
+	case $choice in
+	[Bb]) DB_DEF="$path" ; copyfile ;;
+	[Rr]) nodb ;;
+	esac
+fi
+}
+
+
+
+####
+## if main database(not backed-up db) exists, prompt to overwrite else just go
+## to back it up
+####
+origexist()
+{
+if test -e "$DB"
+  then
+	overwrite
+  else
+	copyfile
+fi 
+}
+
+
+
+####
+## prompt to overwrite database
+##
+####
+overwrite()
+{
+echo -en "A database file already exists.\nOverwite?? (y/n): ";
+read answer;
+case $answer in
+	[Yy]) copyfile ;;
+	[Nn]) nocopy ; pressenter ;;
+	*) case $choice in
+		[Bb]) pathb ;;
+		[Rr]) pathr ;;
+	   esac
+	 
+esac
+}
+
+
+
+####
+## write new backup file or overwrite db from previous backup file
+##
+####
+copyfile()
+{
+case $choice in
+  [Bb]) cp -f "$DB" "$DB_DEF" ; verify	;;
+  [Rr])	cp -f "$DB_DEF" "$DB" ; verify	;;
+esac
+}
+
+
+
+####
+## tell the user we aren't going to do anything to his/her data
+## if he/she says not to
+####
+nocopy()
+{
+echo -e "\nOk, I won't overwrite existing data\n"; 
+}
+
+
+
+####
+## test to see if data was written
+##
+####
+verify()
+{
+verify="$(diff "$DB_DEF" "$DB")"; 	
+if test "$verify" = ""
+  then
+	case $choice in
+ 	[Bb]) if test -e "$DB_DEF"
+		then
+	          echo -e "\nDatabase successfully backed up to "$DB_DEF"\n" ; pressenter
+		else 
+		  pressenter
+	      fi ;;
+	[Rr]) if test -e "$DB"
+		then
+		  echo -e "\nDatabase successfully restored to "$DB"\n" ; pressenter
+	        else
+		  pressenter
+	      fi ;;
+	esac 
+  else
+	case $choice in
+	[Bb]) echo -e "\nDatabase could not be backed up...";
+		echo -e "\nDo you have permissions to write here??\n"; ;;
+	[Rr]) echo -e "\nDatabase could not be restored...";
+		echo -e "\nDo you have permissions to write here??\n"; ;;
+	esac
+fi 
+}
+
+
+
+####
+## Let the user know that we couldn't find the file he/she asked for
+##
+####
+nodb()
+{
+echo -e "\nSorry, but I couldn't find a database in that location";
+echo -e "Are you sure you spelled it right??\n"
+case $choice in
+  [Bb]) pathb ;;
+  [Rr]) pathr ;;
+esac
+}
+
+
+
+####
+## Displays message telling the user to he/she needs to create a new 
+## database when checking balance and no db exists yet.
+####
+neednewdb()
+{
+  echo 
+  echo "Sorry, I can't find a database" 
+  echo "To create a new database, choose choose Deposit from this menu"
+  pressenter
+}
+
+
+
+####
+## Invalid input error message
+##
+####
+invaliderror()
+{
+  tput cup 15 34 ; echo "                                                  "
+  tput cup 20 10 ; echo "                                                  "
+  tput cup 21 10 ; echo "                                                  "
+  tput cup 22 10 ; echo "                                                  "
+  tput cup 20 20 ; echo "***INVALID INPUT***"
+  tput cup 21 20 ; echo "Press <ENTER> to continue"
+  tput cup 15 34 ; read prompt
+}
+
+
+
+####
+## Pause the screen to read messages
+##
+####
+pressenter()
+{
+echo -e "\nPress <ENTER> to continue" ; read prompt
+}
+
+usage()
+{
+echo -e "\nUsage:\n\n      ChkBk does not need any arguments:
+	To run ChkBk:
+	- change to the directory where chkbk is located:
+		cd /home/<username>/chkbk-<Version>
+	- run the script chkbk
+		./chkbk
+
+      The recommended terminal size settings to use ChkBk are 110x40.
+	The program should look fine at the usual default settings of 80x24
+	but will look ugly when you try to check your balance.
+
+	Menu Navigation
+	- To choose a feature just select the letter surrounded by
+	  parentheses-except for the copyright logo (C), obviously.
+	- Typing '"h"' in most any menu field will bring open the help file.
+	- When in the deposit or withdrawal screens for savings or checking,
+	  enter a '"q"' in any field and you will exit back to the menu.
+	  If you make a mistake in one of the fields just hit enter and either
+	  the field will clear or move to the next field.  If the cursor moves
+	  to the next field just type a dash "-" and the previous field will
+	  cleared and the cursor will move there for you to re-enter the data.
+	- When in doubt of how to leave a screen type a '"q"'
+
+	CONTACT
+	 - To contact the author or to report a bug, send a nice, friendly
+	   email to freesol29 AT gmail DOT com.
+
+Licensed under the GPL
+(C) Copyright 2005 Stephen M. Kaiser\n\n"
+}
+######################## End Function Section #################
+
+
+##################### Begin Program ###########################
+trap "rm "$TMPDB" "$TMPFILE" 2> /dev/null; exit" 0 1 2 3
+
+
+if [ "$1" != "" ]
+  then
+	usage         
+        exit 127
+  else
+  	mainmenu
+fi
+
+##################### End Program Section #####################

@@ -1,0 +1,5 @@
+i=0
+for line in sav.db; do
+sed 's/\(*\)*/"$i" \1/' sav.db
+i=i+1
+done

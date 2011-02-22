@@ -1,0 +1,31 @@
+#!/bin/bash
+
+read date
+date_chars="$(echo "$date" |wc -m)"
+echo "date chars = "$date_chars""
+if test "$date_chars" -eq "7"
+  then echo "good date"
+fi
+
+order=n
+while test "$order" = "n"
+do
+old_date="$(grep -i "$date" -B 1 sav.db | head -1 | cut -d '^' -f3)"
+#old_date="$(grep -i "$date" -B 1 sav.db | cut -d '^' -f3)"
+echo "old date = "$old_date""
+if test "$old_date" = ""
+ then
+   echo "this is the first date"
+   read date
+elif test "$date" -gt "$old_date"
+ then
+   echo "in order"
+   order=y
+elif test "$date" = "$old_date"
+ then echo "dates are equal and in order"
+   order=y
+else
+   echo "out of order"
+   read date
+fi
+done

@@ -1,0 +1,126 @@
+VERSION="1.52"
+HELP="$HOME/.chkbk/HELP.txt"
+LICENSE="$HOME/.chkbk/LICENSE.txt"
+S_DEFAULT="$HOME/.chkbk/sav.db.bak"
+C_DEFAULT="$HOME/.chkbk/chk.db.bak"
+SAVDB="$HOME/.chkbk/sav.db"
+CHKDB="$HOME/.chkbk/chk.db"
+TMPDB="$HOME/.chkbk/new.db"
+TMPFILE="$HOME/.chkbk/tmpfile"
+OUTPUTF="$HOME/.chkbk/balance.txt"
+
+loop=y
+
+
+
+####
+## Delete Item search menu
+##
+####
+del_menu()
+{
+searchloop="y"
+while test "$searchloop" = "y"
+  do
+        clear
+        tput cup 5 25   ; echo "Enter search: ___________________________"
+        tput cup 6 25   ; echo '(ex. "010199", "check", "Power bill")'
+        tput cup 10 25  ; echo '(Hint: Type "L" to view a list of entries)'
+        tput cup 5 39   ; read search
+
+        if test "$search" = ""
+          then
+            case $choice in
+                  [Ss]) printmenus ;;
+                  [Cc]) printmenuc ;;
+            esac
+          elif test "$search" = "q"
+            then
+              case $choice in
+                  [Ss]) printmenus ;;
+                  [Cc]) printmenuc ;;
+              esac
+          elif test "$search" = "Q"
+            then
+              case $choice in
+                  [Ss]) printmenus ;;
+                  [Cc]) printmenuc ;;
+              esac
+          elif test "$search" = "L"
+            then
+              cat "$DB" > "$TMPFILE" ; showbal
+          else
+            searchdb_delete
+        fi
+  done
+}
+
+
+
+
+####
+## Search the database for a user defined string
+##
+####
+searchdb()
+{
+  grep -i "$search" "$DB" > "$TMPFILE"
+  read results < "$TMPFILE"
+  if test "$results" != ""
+    then
+      clear ; showbal
+    else
+      clear ; tput cup 5 25  ; echo -en "Sorry, but your search returned no results...\n"
+      pressenter
+  fi
+}
+
+
+pressenter()
+{
+echo -e "\nPress <ENTER> to continue" ; read prompt
+}
+
+#########################new code############################
+
+####
+## Search the database for a user defined string and process for 
+## impending deletion...muahahahah
+##
+####
+searchdb_delete()
+{
+  grep -i "$search" "$DB" > "$TMPFILE"
+  read results < "$TMPFILE"
+  if test "$results" != ""
+    then
+      clear ; showbal
+    else
+      clear ; tput cup 5 25  ; echo -en "Sorry, but your search returned no results...\n"
+      pressenter
+  fi
+}
+
+
+####
+## Delete item from db
+##
+####
+del_item()
+{
+echo "place holder bitch"
+pressenter
+}
+
+################################################################33
+trap "rm "$TMPDB" "$TMPFILE" 2> /dev/null; exit" 0 1 2 3
+
+
+if [ "$1" != "" ]
+  then
+        usage
+        exit 127
+  else
+        del_menu
+fi
+

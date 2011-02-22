@@ -1,0 +1,2 @@
+#sed -e '/^$/d' -e '/^#/d' chkbk.bak | sed -n '$=' 
+sed -e '/^$/d' -e '/[#]/d' chkbk.bak | sed -n '$=' 
